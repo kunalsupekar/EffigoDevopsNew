@@ -1,0 +1,6 @@
+com\arjuncodes\studentsystem\controller\StudentController.class
+com\arjuncodes\studentsystem\StudentsystemApplication.class
+com\arjuncodes\studentsystem\service\StudentService.class
+com\arjuncodes\studentsystem\repository\StudentRepository.class
+com\arjuncodes\studentsystem\service\StudentServiceImpl.class
+com\arjuncodes\studentsystem\model\Student.class
