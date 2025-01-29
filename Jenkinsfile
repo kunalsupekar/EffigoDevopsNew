@@ -16,32 +16,22 @@ pipeline {
     }
 
     stages {
-        
-        // Cleanup old Docker images and logs
-        stage('Cleanup') {
+        stage('Cleanup Server') {
             steps {
                 script {
-                    // Remove old frontend image
                     sh """
-                        docker rmi -f ${FRONTEND_IMAGE_NAME}:${FRONTEND_IMAGE_TAG} || true
-                        docker rmi -f ${REPOSITORY_URI_FRONTEND}:${FRONTEND_IMAGE_TAG} || true
-                    """
-                    
-                    // Remove old backend image
-                    sh """
-                        docker rmi -f ${BACKEND_IMAGE_NAME}:${BACKEND_IMAGE_TAG} || true
-                        docker rmi -f ${REPOSITORY_URI_BACKEND}:${BACKEND_IMAGE_TAG} || true
-                    """
-                    
-                    // Clear old Jenkins logs (optional)
-                    sh """
-                        find /var/log/jenkins/ -type f -name '*.log' -exec rm -f {} +
+                        docker container prune -f
+                        docker image prune -a -f
+                        docker volume prune -f
+                        docker network prune -f
+
+                        find /var/log/jenkins/ -type f -name '*.log' -delete
+                        find /var/lib/jenkins/jobs/ -type d -name "builds" -exec find {} -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +11 | xargs rm -rf \;
                     """
                 }
             }
         }
 
-        // Login to AWS ECR
         stage('Logging into AWS ECR') {
             steps {
                 script {
@@ -53,7 +43,6 @@ pipeline {
             }
         }
 
-        // Cloning the Git repository
         stage('Cloning Git') {
             steps {
                 checkout([$class: 'GitSCM', 
@@ -65,7 +54,6 @@ pipeline {
             }
         }
 
-        // Building Frontend Docker image
         stage('Building Frontend image') {
             steps {
                 script {
@@ -74,7 +62,6 @@ pipeline {
             }
         }
 
-        // Building Backend Docker image
         stage('Building Backend image') {
             steps {
                 script {
@@ -83,7 +70,6 @@ pipeline {
             }
         }
 
-        // Pushing Frontend image to ECR
         stage('Pushing Frontend to ECR') {
             steps {
                 script {
@@ -93,7 +79,6 @@ pipeline {
             }
         }
 
-        // Pushing Backend image to ECR
         stage('Pushing Backend to ECR') {
             steps {
                 script {
@@ -104,3 +89,4 @@ pipeline {
         }
     }
 }
+
