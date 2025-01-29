@@ -15,6 +15,7 @@ spec:
       containers:
       - name: backend
         image: 682033462333.dkr.ecr.ap-south-1.amazonaws.com/effigodevops:backend-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
 ---
@@ -27,8 +28,8 @@ spec:
     app: backend
   ports:
     - protocol: TCP
-      port: 8081
+      port: 8082
       targetPort: 8081
-  type: ClusterIP  # Keeps backend internal
+  type: LoadBalancer  # Keeps backend internal
 
 

@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { Container, Paper, Button, Snackbar } from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
-import apiUrl from './Url';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,12 +22,41 @@ export default function Student() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [students, setStudents] = useState([]);
-  const [open, setOpen] = useState(false); // State for success Snackbar
-  const [errorOpen, setErrorOpen] = useState(false); // State for error Snackbar
+  const [open, setOpen] = useState(false); // Success Snackbar
+  const [errorOpen, setErrorOpen] = useState(false); // Error Snackbar
+  const [apiUrl, setApiUrl] = useState(''); // Store API base URL
   const classes = useStyles();
+  useEffect(() => {
+    
+
+    const fetchApiUrl = async () => {
+      try {
+        console.log("Fetching API URL...");
+        
+        // Prefix the URL with the CORS proxy
+        const response = await axios.get('https://mapm5z5aa2yzqyosvcujfqwhie0mauin.lambda-url.ap-south-1.on.aws/');
+        
+        console.log("Response Status:", response.status); // Log status
+        console.log("Response Data:", response.data);     // Log raw data
+    
+        setApiUrl(response.data); // Set the URL from the response
+      } catch (error) {
+        console.error("Error fetching API URL:", error); // Log the error
+        setErrorOpen(true); // Open error Snackbar if request fails
+      }
+    };
+    
+  
+    fetchApiUrl();
+  }, []);
+  
 
   const handleClick = async (e) => {
     e.preventDefault();
+    if (!apiUrl) {
+      setErrorOpen(true);
+      return;
+    }
     const student = { name, address };
     try {
       const response = await fetch(`${apiUrl}/student/add`, {
@@ -41,22 +70,16 @@ export default function Student() {
       }
 
       console.log('New Student added');
-      setOpen(true); // Show success Snackbar
+      setOpen(true);
     } catch (error) {
       console.error(error);
-      setErrorOpen(true); // Show error Snackbar
+      setErrorOpen(true);
     }
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpen(false);
-    setErrorOpen(false);
   };
 
   useEffect(() => {
+    if (!apiUrl) return; // Ensure API URL is set before fetching students
+
     const fetchStudents = async () => {
       try {
         const response = await fetch(`${apiUrl}/student/getAll`);
@@ -67,12 +90,18 @@ export default function Student() {
         setStudents(result);
       } catch (error) {
         console.error(error);
-        setErrorOpen(true); // Show error Snackbar for failed GET request
+        setErrorOpen(true);
       }
     };
 
     fetchStudents();
-  }, []);
+  }, [apiUrl]); // Fetch students only after API URL is set
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setOpen(false);
+    setErrorOpen(false);
+  };
 
   return (
     <Container>
@@ -98,7 +127,7 @@ export default function Student() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-          <Button variant="contained" color="secondary" onClick={handleClick}>
+          <Button variant="contained" color="secondary" onClick={handleClick} disabled={!apiUrl}>
             Submit
           </Button>
         </form>
@@ -122,14 +151,14 @@ export default function Student() {
         ))}
       </Paper>
 
-      {/* Snackbar for Success */}
+      {/* Success Snackbar */}
       <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success">
           Student added successfully!
         </Alert>
       </Snackbar>
 
-      {/* Snackbar for Error */}
+      {/* Error Snackbar */}
       <Snackbar open={errorOpen} autoHideDuration={3000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="error">
           Unable to communicate with the server. Please try again later.

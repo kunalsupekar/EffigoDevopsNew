@@ -1,5 +1,5 @@
-// src/apiUrl.js
-const apiUrl = "http://backend-service:8081";
+// src/components/Url.js
+const apiUrl = "http://backend-service:";
 
 
 //const apiUrl =process.env.REACT_APP_BASE_URL;

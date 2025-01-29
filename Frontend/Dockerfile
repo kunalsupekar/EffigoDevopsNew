@@ -1,19 +1,13 @@
-# Use the latest LTS version of Node.js
-FROM node:18-alpine
-
+# Build Stage
+FROM node:18-alpine AS build
 WORKDIR /app
-
-# Copy the package.json and install dependencies
 COPY package*.json ./
 RUN npm install
-
-# Copy the rest of the application files
 COPY . .
-
-
-
-# Expose the port (3000 is React's default)
-EXPOSE 3000
-
-# Start the application
-CMD ["npm", "start"]
+RUN npm run build
+ 
+# Production Stage
+FROM nginx:stable-alpine AS production
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
