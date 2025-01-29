@@ -11,6 +11,24 @@ const useStyles = makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
+  container: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '20px',
+    marginTop: '20px',
+  },
+  paperStyle: {
+    padding: '50px 20px',
+    width: 600,
+    margin: '20px auto',
+  },
+  studentsPaper: {
+    padding: '20px',
+    width: '50%',
+    margin: '20px auto',
+    maxHeight: '500px',
+    overflowY: 'scroll',
+  },
 }));
 
 function Alert(props) {
@@ -18,7 +36,6 @@ function Alert(props) {
 }
 
 export default function Student() {
-  const paperStyle = { padding: '50px 20px', width: 600, margin: '20px auto' };
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [students, setStudents] = useState([]);
@@ -26,19 +43,11 @@ export default function Student() {
   const [errorOpen, setErrorOpen] = useState(false); // Error Snackbar
   const [apiUrl, setApiUrl] = useState(''); // Store API base URL
   const classes = useStyles();
-  useEffect(() => {
-    
 
+  useEffect(() => {
     const fetchApiUrl = async () => {
       try {
-        console.log("Fetching API URL...");
-        
-        // Prefix the URL with the CORS proxy
         const response = await axios.get('https://mapm5z5aa2yzqyosvcujfqwhie0mauin.lambda-url.ap-south-1.on.aws/');
-        
-        console.log("Response Status:", response.status); // Log status
-        console.log("Response Data:", response.data);     // Log raw data
-    
         setApiUrl(response.data); // Set the URL from the response
       } catch (error) {
         console.error("Error fetching API URL:", error); // Log the error
@@ -46,10 +55,8 @@ export default function Student() {
       }
     };
     
-  
     fetchApiUrl();
   }, []);
-  
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -69,8 +76,16 @@ export default function Student() {
         throw new Error('Failed to add student');
       }
 
-      console.log('New Student added');
       setOpen(true);
+
+      // Re-fetch students after adding a new one
+      const result = await fetch(`${apiUrl}/student/getAll`);
+      if (!result.ok) {
+        throw new Error('Failed to fetch students');
+      }
+      const studentsData = await result.json();
+      setStudents([studentsData[studentsData.length - 1], ...studentsData]); // Prepend the latest student to the list
+
     } catch (error) {
       console.error(error);
       setErrorOpen(true);
@@ -78,7 +93,7 @@ export default function Student() {
   };
 
   useEffect(() => {
-    if (!apiUrl) return; // Ensure API URL is set before fetching students
+    if (!apiUrl) return;
 
     const fetchStudents = async () => {
       try {
@@ -95,7 +110,7 @@ export default function Student() {
     };
 
     fetchStudents();
-  }, [apiUrl]); // Fetch students only after API URL is set
+  }, [apiUrl]);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') return;
@@ -104,15 +119,14 @@ export default function Student() {
   };
 
   return (
-    <Container>
-      <Paper elevation={3} style={paperStyle}>
+    <Container className={classes.container}>
+      {/* Left Section: Add Student Form */}
+      <Paper elevation={3} className={classes.paperStyle}>
         <h1 style={{ color: 'blue' }}>
           <u>Add Student</u>
         </h1>
-
         <form className={classes.root} noValidate autoComplete="off">
           <TextField
-            id="outlined-basic"
             label="Student Name"
             variant="outlined"
             fullWidth
@@ -120,7 +134,6 @@ export default function Student() {
             onChange={(e) => setName(e.target.value)}
           />
           <TextField
-            id="outlined-basic"
             label="Student Address"
             variant="outlined"
             fullWidth
@@ -133,15 +146,11 @@ export default function Student() {
         </form>
       </Paper>
 
-      <h1>Students</h1>
-
-      <Paper elevation={3} style={paperStyle}>
+      {/* Right Section: Students List */}
+      <Paper elevation={3} className={classes.studentsPaper}>
+        <h1>Students</h1>
         {students.map((student) => (
-          <Paper
-            elevation={6}
-            style={{ margin: '10px', padding: '15px', textAlign: 'left' }}
-            key={student.id}
-          >
+          <Paper elevation={6} style={{ margin: '10px', padding: '15px', textAlign: 'left' }} key={student.id}>
             Id: {student.id}
             <br />
             Name: {student.name}
