@@ -26,7 +26,7 @@ pipeline {
                         docker network prune -f
 
                         find /var/log/jenkins/ -type f -name '*.log' -delete
-                        find /var/lib/jenkins/jobs/ -type d -name "builds" -exec find {} -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +11 | xargs rm -rf \;
+                        find /var/lib/jenkins/jobs/ -type d -name "builds" -exec find {} -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +11 | xargs rm -rf ;
                     """
                 }
             }
