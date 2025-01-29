@@ -1,60 +1,57 @@
-# EffigoDevops
+# Full Stack web-application on AWS EKS
 
-EffigoDevops is a full-stack web application consisting of a React frontend and a Spring Boot backend. This repository includes the application code along with deployment configurations for AWS.
+full-stack web application that integrates a React frontend with a Spring Boot backend. This repository contains the application code along with deployment configurations for AWS.
 
-Project Structure
-
-EffigoDevops/
+## Project Structure
+```bash
+EffigoDevopsNew/
 │── Frontend/      # React application
 │── Backend/       # Spring Boot application
 │── deployment/    # Kubernetes manifests for frontend and backend
-│── Jenkinsfile    # CI/CD pipeline configuration
-│── README.md      # Project documentation
+│── Jenkinsfile    #  pipeline configuration
+│── README.md      # Project documentationInstall something
+```
 
-Deployment Overview
+### Database
 
-The application is deployed on AWS using the following pipeline:
-
-Jenkins (hosted on an AWS Ubuntu instance) builds Docker images for the frontend and backend.
-
-The images are pushed to AWS Elastic Container Registry (ECR).
-
-The application is deployed to AWS Elastic Kubernetes Service (EKS) using Kubernetes manifests.
+PostgreSQL Database is used as the primary database for the application which is Hosted on AWS by using RDS.
 
 
 
-Prerequisites
 
-Ensure you have the following set up:
+### Deployment Overview
 
-AWS account with EKS, ECR, and IAM roles configured.
+- The application is deployed on AWS using the following pipeline:
 
-Kubernetes CLI (kubectl) and AWS CLI installed.
+- Jenkins (hosted on an AWS Ubuntu instance) builds Docker images for the frontend and backend.
 
-Docker installed and configured.
+- The images are pushed to AWS Elastic Container Registry (ECR).
 
-Jenkins set up on an AWS EC2 instance.
+- The application is deployed to AWS Elastic Kubernetes Service (EKS) using Kubernetes manifests.
+
+### Prerequisites
+
+- An AWS account with EKS, ECR, and IAM roles configured.
+- Kubernetes CLI (kubectl) and AWS CLI installed.
+- Docker installed and configured.
+- Jenkins set up on an AWS EC2 instance.
 
 
-enkinsfile (Pipeline Script)
+Jenkinsfile (Pipeline Script)
 
-The Jenkinsfile in the repository automates the following steps:
-
-Checkout the repository
-
-Build Docker images
-
-Authenticate and push images to AWS ECR
-
- Deploy to Kubernetes (EKS)
- kubectl apply -f kubernetes/
-
- . Verify Deployment
-
- kubectl get pods
+Deploy to Kubernetes (EKS)
+```bash
+kubectl apply -f deployment/ 
+```
+Verify Deployment
+```bash
+kubectl get pods
 kubectl get services
-
+```
 Accessing the Application
 
-Once deployed, obtain the external IP(loadbalancer) of the frontend service:
+Once deployed, obtain the external IP (load balancer) of the frontend service:
+```bash
 kubectl get svc frontend-service
+```
+
